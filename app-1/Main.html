@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Массив элементов в блоках</title>
+    <style>
+        .container 
+		{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .block 
+		{
+            width: 200px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e6e2e2;
+            border: 1px solid #252525;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="content"></div>
+
+<script>
+    const BLOCK_SIZE = { width: 200, height: 100 };
+    const items = ["Puma", "Reebok", "Nike", "Kappa", 
+                   "Fila", "Under Armor", "Adidas", "New Balance", 
+                   "Vans", "Demix"];
+
+    function renderBlocks(data) 
+	{
+        const container = document.getElementById('content');
+        container.innerHTML = ''; 
+
+        const maxBlocksInRow = Math.floor(window.innerWidth / (BLOCK_SIZE.width + 10));
+        container.style.maxWidth = `${maxBlocksInRow * (BLOCK_SIZE.width + 10)}px`;
+
+        for (let i = 0; i < data.length; i++) 
+		{
+            const div = document.createElement('div');
+            div.className = 'block';
+            div.style.width = `${BLOCK_SIZE.width}px`;
+            div.style.height = `${BLOCK_SIZE.height}px`;
+            div.textContent = data[i];
+            container.appendChild(div);
+        }
+    }
+
+    renderBlocks(items);
+
+    window.onresize = () => renderBlocks(items);
+</script>
+
+</body>
+</html>

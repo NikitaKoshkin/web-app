@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Форма данных</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            color: #333;
+        }
+        header {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        fieldset {
+            border: 2px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        legend {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #4CAF50;
+        }
+        label {
+            font-weight: 600;
+            margin-top: 10px;
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #f1f1f1;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Форма данных</h1>
+    </header>
+    <main>
+        <h2 id="formTitle">Универсальная форма</h2>
+        <form id="dataForm">
+            <div id="formContainer"></div>
+            <button type="submit">Сохранить</button>
+        </form>
+        <hr>
+        <h2>Ранее введенные данные</h2>
+        <ul id="dataList"></ul>
+    </main>
+
+    <script>
+        const formContainer = document.getElementById('formContainer');
+        const dataList = document.getElementById('dataList');
+        const formTitle = document.getElementById('formTitle');
+
+        // Загрузка структуры формы и построение полей
+        fetch('/api/structure')
+            .then(response => response.json())
+            .then(structure => {
+                formTitle.textContent = structure.name || 'Универсальная форма';
+                buildForm(structure.fields);
+            });
+
+        function buildForm(fields) {
+            fields.forEach(field => {
+                const label = document.createElement('label');
+                label.textContent = field.name;
+
+                const input = document.createElement('input');
+                input.type = mapTypeToInput(field.type);
+                input.name = field.name;
+
+                formContainer.appendChild(label);
+                formContainer.appendChild(input);
+            });
+        }
+
+        function mapTypeToInput(type) {
+            switch (type) {
+                case 'string': return 'text';
+                case 'number': return 'number';
+                case 'date': return 'date';
+                case 'boolean': return 'checkbox';
+                default: return 'text';
+            }
+        }
+
+        document.getElementById('dataForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = {};
+            new FormData(e.target).forEach((value, key) => {
+                formData[key] = value;
+            });
+
+            fetch('/api/data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            }).then(() => {
+                loadData();
+                e.target.reset();
+            });
+        });
+
+        function loadData() {
+            fetch('/api/data')
+                .then(response => response.json())
+                .then(data => {
+                    dataList.innerHTML = '';
+                    data.forEach((entry, index) => {
+                        const li = document.createElement('li');
+                        li.textContent = `Запись ${index + 1}: ${JSON.stringify(entry)}`;
+                        dataList.appendChild(li);
+                    });
+                });
+        }
+
+        loadData();
+    </script>
+</body>
+</html>
